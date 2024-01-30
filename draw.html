@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart with Custom Legend</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<style>
+    #box {
+        height: 600px; 
+        width: 700px; 
+        justify-content: center; 
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        margin: auto;
+    }
+</style>
+
+<body>
+    <div id="box">
+        <div id="legend" class="legend-div"></div>
+        <canvas id="myChart" style="display: block; box-sizing: border-box;"></canvas>
+    </div>
+
+    <script>
+        const chartCanvas = document.getElementById('myChart').getContext('2d');;
+        const legendDiv = document.getElementById('legend');
+
+        const chartData = {
+            labels: ['Jelly', 'BubbleGum', 'Candy', 'Chocolate', 'Juice', 'Cookies'],
+            datasets: [
+            {
+                label: 'yellow',
+                data: [12, 18, 3, 5, 2, 12],
+                borderWidth: 2,
+                borderColor: 'yellow',
+            },{
+                label: 'pink',
+                data: [12, 20, 13, 5, 1, 1],
+                borderWidth: 2,
+                borderColor: 'pink',
+            },{
+                label: 'blue',
+                data: [31, 6, 14, 4, 2, 3],
+                borderWidth: 2,
+                borderColor: 'skyblue',
+            },{
+                label: 'green',
+                data: [5, 19, 9, 13, 4, 9],
+                borderWidth: 2,
+                borderColor: 'green',
+            },{
+                label: 'purple',
+                data: [6, 0, 13, 3, 25, 16],
+                borderWidth: 2,
+                borderColor: 'purple',
+            },{
+                label: 'gray',
+                data: [12, 8, 3, 5, 8, 6],
+                borderWidth: 2,
+                borderColor: 'gray',
+            },{
+                label: 'white',
+                data: [12, 19, 0, 8, 9, 3],
+                borderWidth: 2,
+                borderColor: 'lightgreen',
+            },{
+                label: 'brown',
+                data: [28, 26, 22, 5, 2, 3],
+                borderWidth: 2,
+                borderColor: 'brown',
+            },{
+                label: 'red',
+                data: [12, 22, 35, 10, 7, 11],
+                borderWidth: 2,
+                borderColor: 'red',
+            },{
+                label: 'orange',
+                data: [12, 7, 17, 1, 4, 24],
+                borderWidth: 2,
+                borderColor: 'orange',
+            }
+            ]
+        };
+
+        const chartDraw = function () {
+            const chart = new Chart(chartCanvas, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins:{
+                        legend: {
+                            display: false,
+                        },
+                    }
+                },
+            });
+
+            // Custom Legend
+            const ul = document.createElement('ul');
+            ul.style.display = 'flex';
+            legendDiv.appendChild(ul);
+
+            const legendItems = chart.legend.legendItems;
+            legendItems.reverse().forEach((item, index) => {
+                const li = document.createElement('li');
+                li.style.alignItems = 'center';
+                li.style.cursor = 'pointer';
+                li.style.display = 'flex';
+                li.style.flexDirection = 'row';
+                li.style.marginLeft = '30px';
+                li.style.height = '30px';
+                li.style.lineHeight = '30px';
+
+                li.innerHTML = `
+                    <div style="width: 15px; height: 15px; margin-right: 5px; background-color: ${item.fillStyle};"></div>
+                    ${item.text}
+                `;
+
+                li.onclick = () => {
+					const {type} = chart.config;
+					if (type === 'pie' || type === 'doughnut') {
+						chart.toggleDataVisibility(item.index);
+					} else {
+						chart.setDatasetVisibility(item.datasetIndex, !chart.isDatasetVisible(item.datasetIndex));
+					}
+					chart.update();
+				};
+
+                ul.appendChild(li);
+            });
+        }
+
+        window.onload = function () {
+            chartDraw();
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<header>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Legend</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</header>
+
+<style>
+    #box {
+        width: 1000px;
+        height: 900px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+    }
+</style>
+
+<body>
+    <div id="box">
+        <div id="legend"></div>
+        <canvas id="myChart"></canvas>
+    </div>
+</body>
+
+
+<script>
+
+    let chartData = {
+        labels: ['Jelly', 'BubbleGum', 'Candy', 'Chocolate', 'Juice', 'Cookies'],
+        datasets: [
+            {
+                label: 'yellow',
+                data: [12, 18, 3, 5, 2, 12],
+                borderWidth: 2,
+                borderColor: 'yellow',
+                backgroundColor : 'yellow',
+            }, {
+                label: 'pink',
+                data: [12, 20, 13, 5, 9, 1],
+                borderWidth: 2,
+                borderColor: 'pink',
+                backgroundColor: 'pink',
+            }, {
+                label: 'blue',
+                data: [31, 6, 14, 4, 2, 3],
+                borderWidth: 2,
+                borderColor: 'skyblue',
+                backgroundColor: 'skyblue',
+            }, {
+                label: 'green',
+                data: [5, 3, 9, 13, 22, 9],
+                borderWidth: 2,
+                borderColor: 'green',
+                backgroundColor: 'green',
+            }, {
+                label: 'purple',
+                data: [6, 0, 13, 3, 25, 16],
+                borderWidth: 2,
+                borderColor: 'purple',
+                backgroundColor: 'purple',
+            }, {
+                label: 'gray',
+                data: [12, 8, 3, 5, 8, 6],
+                borderWidth: 2,
+                borderColor: 'gray',
+                backgroundColor: 'gray',
+            }, {
+                label: 'white',
+                data: [12, 19, 0, 28, 9, 3],
+                borderWidth: 2,
+                borderColor: 'lightgreen',
+                backgroundColor: 'lightgreen',
+            }, {
+                label: 'brown',
+                data: [28, 26, 22, 5, 32, 3],
+                borderWidth: 2,
+                borderColor: 'brown',
+                backgroundColor: 'brown',
+            }, {
+                label: 'red',
+                data: [12, 22, 35, 10, 17, 11],
+                borderWidth: 2,
+                borderColor: 'red',
+                backgroundColor: 'red',
+            }, {
+                label: 'orange',
+                data: [12, 7, 17, 10, 4, 24],
+                borderWidth: 2,
+                borderColor: 'orange',
+                backgroundColor: 'orange',
+            }
+        ]
+    }
+
+    const chartCanvas = document.getElementById('myChart');
+
+    window.onload = function () {
+        drawChart();
+    }
+
+    const getOrCreateLegendList = (chart, id) => {
+        const legendContainer = document.getElementById(id);
+        let listContainer = legendContainer.querySelector('ul');
+
+        if (!listContainer) {
+            listContainer = document.createElement('ul');
+            listContainer.style.display = 'flex';
+            listContainer.style.flexDirection = 'row';
+            listContainer.style.margin = 0;
+            listContainer.style.padding = 0;
+
+            legendContainer.appendChild(listContainer);
+        }
+
+        return listContainer;
+    };
+
+    const htmlLegendPlugin = {
+        id: 'htmlLegend',
+        afterUpdate(chart, args, options) {
+            const ul = getOrCreateLegendList(chart, options.containerID);
+
+            // Remove old legend items
+            while (ul.firstChild) {
+                ul.firstChild.remove();
+            }
+
+            // Reuse the built-in legendItems generator
+            const items = chart.options.plugins.legend.labels.generateLabels(chart);
+
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.style.alignItems = 'center';
+                li.style.cursor = 'pointer';
+                li.style.display = 'flex';
+                li.style.flexDirection = 'row';
+                li.style.marginLeft = '10px';
+
+                li.onclick = () => {
+                    const { type } = chart.config;
+                    if (type === 'pie' || type === 'doughnut') {
+                        // Pie and doughnut charts only have a single dataset and visibility is per item
+                        chart.toggleDataVisibility(item.index);
+                    } else {
+                        chart.setDatasetVisibility(item.datasetIndex, !chart.isDatasetVisible(item.datasetIndex));
+                    }
+                    chart.update();
+                };
+
+                // Color box
+                const boxSpan = document.createElement('span');
+                boxSpan.style.background = item.fillStyle;
+                boxSpan.style.borderColor = item.strokeStyle;
+                boxSpan.style.borderWidth = item.lineWidth + 'px';
+                boxSpan.style.display = 'inline-block';
+                boxSpan.style.flexShrink = 0;
+                boxSpan.style.height = '20px';
+                boxSpan.style.marginRight = '10px';
+                boxSpan.style.width = '20px';
+
+                // Text
+                const textContainer = document.createElement('p');
+                textContainer.style.color = item.fontColor;
+                textContainer.style.margin = 0;
+                textContainer.style.padding = 0;
+                textContainer.style.textDecoration = item.hidden ? 'line-through' : '';
+
+                const text = document.createTextNode(item.text);
+                textContainer.appendChild(text);
+
+                li.appendChild(boxSpan);
+                li.appendChild(textContainer);
+                ul.appendChild(li);
+            });
+        }
+    };
+
+
+    const drawChart = function() {
+        new Chart(chartCanvas, {
+            type: 'line',
+            data: chartData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    htmlLegend: { containerID: 'legend' },
+                    legend:{display:false}
+                }
+            },
+            plugins: [htmlLegendPlugin],
+        });
+    }
+</script>
